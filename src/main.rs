@@ -13,6 +13,7 @@ static REGEXES: [&str; 5] = [
     // Get paramter names
     r"[\?&](?:([^=]+)=)?"
 ];
+// TODO: combile all regexes in just one &str varable
 
 
 
