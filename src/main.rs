@@ -5,7 +5,7 @@ static REGEXES: [&str; 5] = [
     //Get inline javascript variables defined with var, const or let
     r"(?:var|const|let)\s+([a-zA-Z_]\w*)\s*=",
     // Get JSON keys
-    r#""([a-zA-Z0-9$_\.-]*?)":"#,
+    r#"["']{0,1}([a-zA-Z0-9$_\.-]*?)["']{0,1}:"#,
     // Get HTML input names
     r#"<input (?:[^>]*name=["']([^'"]*)|)"#,
     // Get HTML input ids
@@ -14,13 +14,17 @@ static REGEXES: [&str; 5] = [
     r"[\?&](?:([^=]+)=)?"
 ];
 // TODO: combile all regexes in just one &str varable
+static JS_STRINGS: &str = r#"(?:|\[|,|, | ,)\s*['"]([a-zA-Z0-9\_-]+)['"]\s*(?:\s|\]|\)|,|, | ,)"#;
 
 
+fn find_params(body: &String, printed: &mut Vec<String>, include_js_strings: bool) {
+    let bad_regex = Regex::new(r#"["'\(\):&\[\] ;#]|(^[0-9]+$)"#).unwrap();
+    let mut r: Vec<&str> = [&REGEXES[..]].concat();
+    if include_js_strings {
+        r = [&REGEXES[..], &[JS_STRINGS]].concat();
+    }
 
-fn find_params(body: &String, printed: &mut Vec<String>) {
-    let bad_regex = Regex::new(r#"["'\(\):&\[\] ;#]"#).unwrap();
-
-    for re in REGEXES {
+    for re in r {
 
         let re = Regex::new(re).unwrap();
         let result = re.captures_iter(&body);
@@ -44,14 +48,18 @@ fn main() -> Result<(), Box<dyn Error>>{
     let mut count = 0;
     let mut body = String::new();
     let mut printed: Vec<String> = vec![];
-
+    let args: Vec<String> = std::env::args().collect();
+    let include_js_strings = match args.get(1) {
+        Some(val) => if val == "strings" {true} else {false},
+        None => false
+    };
 
     loop {
 
         let red_byte = stdin.read_line(&mut buffer)?;
 
         if red_byte == 0 {
-            find_params(&body, &mut printed);
+            find_params(&body, &mut printed, include_js_strings);
             break;
         }
 
@@ -59,7 +67,7 @@ fn main() -> Result<(), Box<dyn Error>>{
         body += &buffer;
 
         if count == 10000 {
-            find_params(&body, &mut printed);
+            find_params(&body, &mut printed, include_js_strings);
             count = 1;
             body.clear()
         }
