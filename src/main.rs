@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::{
     error::Error,
-    io::{self, BufRead},
+    io::{self, BufRead}, process::exit,
 };
 
 static JAVASCRIPT_VARABLES: &str = r"(?:var|const|let)\s+([a-zA-Z_]\w*)\s*=";
@@ -54,7 +54,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
 
     let s = if let Some(arg) = args.get(1) {
-        arg == "strings"
+        if arg == "strings" {
+            true
+        } else {
+            println!("Usage: pex [strings]");
+            exit(1);
+        }
     } else {
         false
     };
