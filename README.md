@@ -1,17 +1,23 @@
-# Example
-```bash
-$ curl -s https://domain.tld/file.js | pex # or `pex strings` to extract all strings
-test_var
-test_obj
-empty_var
-obj_key1
-obj_key2
-username
-check
-redirect
-param1
-with_amper
-param2
-```
-![Screenshot from 2024-05-14 21-19-12](https://github.com/m333rl1n/pex/assets/141517503/f36a5191-ab2c-4a31-a2ad-9384810aaca2)
+# PEX
+`pex` is a simple parameter extractor written in Rust.
 
+### Installation
+```console
+cargo install --git https://github.com/m333rl1n/pex.git
+```
+
+### Usage
+```console
+$ pex -h
+USAGE: pex [strings]
+```
+1. Simple usage:
+```console
+$ curl -s https://domain.tld/file.js | pex # or `pex strings` to extract all javascript strings
+```
+![image](https://github.com/user-attachments/assets/44b925b6-7796-402f-9349-cf949bc3d804)
+
+2. Advanced usage:
+```console
+$ cat urls.txt | concurl && find out/* -type f -exec cat {} + | pex
+```
